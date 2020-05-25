@@ -337,8 +337,8 @@ int TakeStream::open(char* url)
 		return -1;
 	}
 	pOutFormatContext->pb = pIOContext;
-	//pOutFormatContext->pb->write_flag = 1;
-	//pOutFormatContext->pb->seekable = 1;
+	pOutFormatContext->pb->write_flag = 1;
+	pOutFormatContext->pb->seekable = 1;
 	pOutFormatContext->flags = AVFMT_FLAG_CUSTOM_IO;
 	pOutFormatContext->flags |= AVFMT_FLAG_FLUSH_PACKETS;
 	pOutFormatContext->flags |= AVFMT_NOFILE;
@@ -380,6 +380,7 @@ int TakeStream::open(char* url)
 
 
 	//ÒôÆµ
+	hasAudio = false;//ÒôÆµÔÝÎ´²âÊÔ
 	if (hasAudio) {
 		AVStream* in_audio_stream = pFormatContext->streams[audioStreamIdx];
 		AVStream* out_audio_stream = avformat_new_stream(pOutFormatContext, NULL);
@@ -433,7 +434,9 @@ int TakeStream::open(char* url)
 	std::string codecMime = "video/mp4; codecs=\"avc1." + GetMIME(pCodecParam->extradata, pCodecParam->extradata_size);
 	if (outAudioStreamIdx != -1)
 	{
-		switch (pOutFormatContext->streams[outAudioStreamIdx]->codecpar->profile)
+		int profile = pOutFormatContext->streams[outAudioStreamIdx]->codecpar->profile;
+		log(AV_LOG_INFO, "audio profile is %d", profile);
+		switch (profile)
 		{
 		case FF_PROFILE_AAC_MAIN:
 			codecMime += ",mp4a.40.1";
